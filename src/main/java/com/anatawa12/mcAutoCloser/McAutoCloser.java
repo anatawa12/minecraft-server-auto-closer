@@ -45,7 +45,7 @@ public class McAutoCloser implements ICommandSender {
 
     @Override
     public void addChatMessage(IChatComponent component) {
-        System.out.println("McAutoCloser: " + component);
+        System.out.println("McAutoCloser: " + component.getUnformattedText());
     }
 
     @Override
