@@ -37,3 +37,8 @@ If found, this mod waits specified ticks or seconds
 before sends `stop` command.
 For `minecraft-server-auto-closer-1.0-stop-after-20-ticks.jar`,
 this mod waits 20 ticks after server start event.
+
+## License
+
+This software is published under MIT License.
+See [LICENSE](LICENSE) for more information.
