@@ -1,16 +1,11 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "server-auto-closer",
+  "name": "Server Auto Closer",
+  "description": "A mod to close a server automatically",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
-  "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
+  "authorList": ["anatawa12"],
+  "credits": "(c) anatawa12 and other contributors. released under MIT License"
 }
 ]
