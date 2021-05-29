@@ -16,6 +16,8 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,6 +30,7 @@ import java.util.regex.Pattern;
 @Mod(modid = "server-auto-closer")
 @SuppressWarnings("unused")
 public class McAutoCloser implements ICommandSender {
+    private static Logger LOGGER = LogManager.getLogger("McAutoCloser");
     private static int waitTicks = 0;
     private static int waitSeconds = 0;
     private static File modFile;
@@ -46,8 +49,10 @@ public class McAutoCloser implements ICommandSender {
         waitSeconds = 0;
         findWait();
         if (waitTicks == 0 && waitSeconds == 0) {
+            LOGGER.info("no delay found so shutdown the server now!");
             sendStop();
         } else if (waitTicks == 0) {
+            LOGGER.info("delay {} seconds so starting thread", waitSeconds);
             // this means second based waiting.
             new Thread() {
                 {
@@ -64,6 +69,7 @@ public class McAutoCloser implements ICommandSender {
                 }
             }.start();
         } else {
+            LOGGER.info("delay {} ticks", waitTicks);
             // this means tick based waiting.
             FMLCommonHandler.instance().bus().register(this);
         }
@@ -150,7 +156,7 @@ public class McAutoCloser implements ICommandSender {
 
     @Override
     public void addChatMessage(IChatComponent component) {
-        System.out.println("McAutoCloser: " + component.getUnformattedText());
+        LOGGER.info("McAutoCloser: {}", component.getUnformattedText());
     }
 
     @Override
