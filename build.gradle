@@ -25,6 +25,8 @@ plugins {
 // These settings allow you to choose what version of Java you want to be compatible with. Forge 1.7.10 runs on Java 6 to 8.
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
+// for testing
+//archivesBaseName = "minecraft-server-auto-closer-stop-after-3-seconds"
 
 apply plugin: 'forge'
 
