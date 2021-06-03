@@ -13,32 +13,41 @@ processResources {
     }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_6
+    targetCompatibility = JavaVersion.VERSION_1_6
+}
+
 allprojects {
+    apply plugin: "java"
+
     version = rootProject.version
     group = rootProject.group
 
-    afterEvaluate {
-        tasks.withType(JavaCompile) {
-            options.encoding = "UTF-8"
-        }
+    dependencies {
+        compileOnly(rootProject)
+    }
 
-        // This task creates a .jar file containing the source code of this mod.
-        task sourcesJar(type: Jar, dependsOn: classes) {
-            classifier = "sources"
-            from sourceSets.main.allSource
-        }
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
 
-        // This task creates a .jar file containing a deobfuscated version of this mod, 
-        // for other developers to use in a development environment.
-        task devJar(type: Jar) {
-            classifier = "dev"
-            from sourceSets.main.output
-        }
+    // This task creates a .jar file containing the source code of this mod.
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = "sources"
+        from sourceSets.main.allSource
+    }
 
-        // Creates the listed artifacts on building the mod.
-        artifacts {
-            archives sourcesJar
-            archives devJar
-        }
+    // This task creates a .jar file containing a deobfuscated version of this mod, 
+    // for other developers to use in a development environment.
+    task devJar(type: Jar) {
+        classifier = "dev"
+        from sourceSets.main.output
+    }
+
+    // Creates the listed artifacts on building the mod.
+    artifacts {
+        archives sourcesJar
+        archives devJar
     }
 }

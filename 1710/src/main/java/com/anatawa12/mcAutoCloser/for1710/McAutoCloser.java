@@ -1,5 +1,6 @@
 package com.anatawa12.mcAutoCloser.for1710;
 
+import com.anatawa12.mcAutoCloser.Common;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -20,20 +21,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Mod(modid = "server-auto-closer")
 @SuppressWarnings("unused")
-public class McAutoCloser implements ICommandSender {
-    private static Logger LOGGER = LogManager.getLogger("McAutoCloser");
-    private static int waitTicks = 0;
-    private static int waitSeconds = 0;
-    private static File modFile;
+public class McAutoCloser extends Common implements ICommandSender {
+    private static final Logger LOGGER = LogManager.getLogger("McAutoCloser");
 
     // single side mod
     @NetworkCheckHandler
@@ -42,37 +35,10 @@ public class McAutoCloser implements ICommandSender {
     }
 
     @EventHandler
-    public void init(FMLServerStartedEvent _event) {
+    public void serverStarted(FMLServerStartedEvent _event) {
         if (FMLCommonHandler.instance().getSide() != Side.SERVER) return;
         if (!(FMLCommonHandler.instance().getMinecraftServerInstance() instanceof DedicatedServer)) return;
-        waitTicks = 0;
-        waitSeconds = 0;
-        findWait();
-        if (waitTicks == 0 && waitSeconds == 0) {
-            LOGGER.info("no delay found so shutdown the server now!");
-            sendStop();
-        } else if (waitTicks == 0) {
-            LOGGER.info("delay {} seconds so starting thread", waitSeconds);
-            // this means second based waiting.
-            new Thread() {
-                {
-                    setName("McAutoCloser");
-                    setDaemon(true);
-                }
-                @Override
-                public void run() {
-                    try {
-                        sleep(waitSeconds * 1000L);
-                        sendStop();
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            }.start();
-        } else {
-            LOGGER.info("delay {} ticks", waitTicks);
-            // this means tick based waiting.
-            FMLCommonHandler.instance().bus().register(this);
-        }
+        onServerStarted();
     }
 
     @EventHandler
@@ -83,65 +49,27 @@ public class McAutoCloser implements ICommandSender {
     @SubscribeEvent
     public void tick(TickEvent.ServerTickEvent _event) {
         if (_event.phase != TickEvent.Phase.START) return;
-        if (--waitTicks == -1) {
-            sendStop();
-            FMLCommonHandler.instance().bus().unregister(this);
-        }
+        onTick();
     }
 
-    private void sendStop() {
+    protected void sendStop() {
         MinecraftServer instance = FMLCommonHandler.instance().getMinecraftServerInstance();
         ((DedicatedServer) instance).addPendingCommand("stop", this);
     }
 
-    @SuppressWarnings("UnnecessarySemicolon")
-    private void findWait() {
-        if (findWaitFile(new File("./config/minecraft-server-auto-closer.txt"))) return;
-        if (findWaitFile(new File("./mods/minecraft-server-auto-closer.txt"))) return;
-        if (findWaitFile(new File("./mods/" + modFile.getName() + ".txt"))) return;
-        if (findInFileName(modFile.getName())) return;
-        ;
+    @Override
+    protected void startReceiveTicks() {
+        FMLCommonHandler.instance().bus().register(this);
     }
 
-    private boolean findWaitFile(File file) {
-        Scanner sc = null;
-        try {
-            sc = new Scanner(file);
-            int count = sc.nextInt();
-            if (count < 0) return false;
-            String token = sc.next();
-            if ("seconds".equals(token)) {
-                waitSeconds = count;
-                return true;
-            }
-            if ("ticks".equals(token)) {
-                waitTicks = count;
-                return true;
-            }
-            return false;
-        } catch (FileNotFoundException e) {
-            return false;
-        } catch (NoSuchElementException e) {
-            return false;
-        } finally {
-            if (sc != null) sc.close();
-        }
+    @Override
+    protected void stopReceiveTicks() {
+        FMLCommonHandler.instance().bus().unregister(this);
     }
 
-    private boolean findInFileName(String name) {
-        Pattern pattern = Pattern.compile("stop-after-(\\d+)-(seconds|ticks)",
-                Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(name);
-        if (matcher.find()) {
-            int value = Integer.parseInt(matcher.group(1));
-            if (matcher.group(2).equals("seconds")) {
-                waitSeconds = value;
-            } else {
-                waitTicks = value;
-            }
-            return true;
-        }
-        return false;
+    @Override
+    protected void infoLog(String msg, Object... args) {
+        LOGGER.info(msg, args);
     }
 
     @Override
