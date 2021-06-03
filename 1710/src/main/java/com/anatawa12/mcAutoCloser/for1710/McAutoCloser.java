@@ -1,4 +1,4 @@
-package com.anatawa12.mcAutoCloser;
+package com.anatawa12.mcAutoCloser.for1710;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
