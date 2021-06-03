@@ -1,4 +1,4 @@
-package com.anatawa12.mcAutoCloser.for1710;
+package com.anatawa12.mcAutoCloser.for1122;
 
 import com.anatawa12.mcAutoCloser.Common;
 import net.minecraft.command.ICommandSender;
