@@ -17,11 +17,6 @@ buildscript {
     }
 }
 
-plugins {
-    id 'java-library'
-    id 'maven-publish'
-}
-
 apply plugin: 'forge'
 
 java {
