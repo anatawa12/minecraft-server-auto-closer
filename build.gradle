@@ -54,3 +54,44 @@ subprojects {
     // the task to specify generating jar is finished
     task finishCreateJar
 }
+
+// then create fat jar now!
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set("sources")
+    from sourceSets.main.allSource
+    subprojects.each {
+        dependsOn(it.tasks.sourcesJar)
+        from (zipTree(it.tasks.sourcesJar.archiveFile)) {
+            exclude "META-INF", "META-INF/**"
+        }
+    }
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+}
+
+task devJar(type: Jar) {
+    archiveClassifier.set("dev")
+    from sourceSets.main.output
+    subprojects.each {
+        dependsOn(it.tasks.devJar)
+        from (zipTree(it.tasks.devJar.archiveFile)) {
+            exclude "META-INF", "META-INF/**"
+        }
+    }
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+}
+
+jar {
+    subprojects.each {
+        dependsOn(it.tasks.finishCreateJar)
+        from (zipTree(it.tasks.jar.archiveFile)) {
+            exclude "META-INF", "META-INF/**"
+        }
+    }
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+}
+
+artifacts {
+    archives sourcesJar
+    archives devJar
+}
