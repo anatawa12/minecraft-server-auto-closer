@@ -4,7 +4,6 @@
   "name": "Server Auto Closer",
   "description": "A mod to close a server automatically",
   "version": "${version}",
-  "mcversion": "${mcversion}",
   "authorList": ["anatawa12"],
   "credits": "(c) anatawa12 and other contributors. released under MIT License"
 }
