@@ -50,4 +50,7 @@ allprojects {
         archives sourcesJar
         archives devJar
     }
+
+    // the task to specify generating jar is finished
+    task finishCreateJar
 }

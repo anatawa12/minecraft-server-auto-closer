@@ -32,3 +32,5 @@ dependencies {
 }
 
 jar.finalizedBy('reobfJar')
+
+finishCreateJar.dependsOn("reobfJar")

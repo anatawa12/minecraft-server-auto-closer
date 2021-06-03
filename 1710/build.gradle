@@ -28,3 +28,5 @@ minecraft {
     version = "1.7.10-${rootProject.forge_version_1710}"
     runDir = "run"
 }
+
+finishCreateJar.dependsOn(reobf)
