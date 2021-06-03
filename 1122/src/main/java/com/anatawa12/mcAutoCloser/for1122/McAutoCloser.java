@@ -6,6 +6,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -58,12 +59,12 @@ public class McAutoCloser extends Common implements ICommandSender {
 
     @Override
     protected void startReceiveTicks() {
-        FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @Override
     protected void stopReceiveTicks() {
-        FMLCommonHandler.instance().bus().unregister(this);
+        MinecraftForge.EVENT_BUS.unregister(this);
     }
 
     @Override
