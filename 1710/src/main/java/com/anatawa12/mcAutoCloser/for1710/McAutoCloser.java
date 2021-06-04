@@ -41,11 +41,6 @@ public class McAutoCloser extends Common implements ICommandSender {
         onServerStarted();
     }
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        modFile = event.getSourceFile();
-    }
-
     @SubscribeEvent
     public void tick(TickEvent.ServerTickEvent _event) {
         if (_event.phase != TickEvent.Phase.START) return;

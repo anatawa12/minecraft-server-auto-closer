@@ -8,9 +8,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class Common {
+    private static final File modFile = getClassSourceOf(Common.class);
     private static int waitTicks = 0;
     private static int waitSeconds = 0;
-    protected static File modFile;
 
     protected abstract void sendStop();
     protected abstract void startReceiveTicks();
@@ -103,5 +103,21 @@ public abstract class Common {
             return true;
         }
         return false;
+    }
+
+    private static File getClassSourceOf(@SuppressWarnings("SameParameterValue") Class<?> clazz) {
+        try {
+            String uri = clazz.getProtectionDomain().getCodeSource().getLocation().toURI().toString();
+            if (uri.startsWith("jar:"))
+                uri = uri.substring("jar:".length(), uri.toString().indexOf("!/"));
+            String classNamePath = clazz.getName().replace('.', '/') + ".class";
+            if (uri.endsWith(classNamePath)) {
+                // remove package/ClassName.class suffix
+                uri = uri.substring(0, uri.length() - classNamePath.length());
+            }
+            return new File(new java.net.URI(uri));
+        } catch (java.net.URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
