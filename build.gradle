@@ -25,7 +25,7 @@ subprojects {
     group = rootProject.group
 
     dependencies {
-        compileOnly(rootProject)
+        implementation(rootProject.sourceSets.main.output)
     }
 
     tasks.withType(JavaCompile) {
