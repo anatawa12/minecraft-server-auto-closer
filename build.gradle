@@ -7,7 +7,7 @@ processResources {
     inputs.property "version", project.version
 
     // Replace values in only mcmod.info.
-    filesMatching('mcmod.info') {
+    filesMatching(['mcmod.info', "META-INF/mods.toml"]) {
         // Replace version
         expand 'version':project.version
     }
@@ -55,43 +55,67 @@ subprojects {
     task finishCreateJar
 }
 
+private static String toCamelCase(String... parts) {
+    def builder = new StringBuilder()
+    boolean first = true
+    for (String part in parts) {
+        if (part.isEmpty()) continue
+        if (first) {
+            builder.append(part.charAt(0).toLowerCase())
+            first = false
+        } else {
+            builder.append(part.charAt(0).toUpperCase())
+        }
+        builder.append(part.substring(1))
+    }
+    return builder.toString()
+}
+
 // then create fat jar now!
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    archiveClassifier.set("sources")
-    from sourceSets.main.allSource
-    subprojects.each {
-        dependsOn(it.tasks.sourcesJar)
-        from (zipTree(it.tasks.sourcesJar.archiveFile)) {
+def configureJar(Jar task, List<Project> projects, String dependsOn, String archiveFileFrom = dependsOn) {
+    projects.each {
+        task.dependsOn(it.tasks.getByName(dependsOn))
+        task.from (zipTree(((Jar) it.tasks.getByName(archiveFileFrom)).archiveFile)) {
             exclude "META-INF", "META-INF/**"
         }
     }
-    duplicatesStrategy = DuplicatesStrategy.FAIL
+    task.duplicatesStrategy = DuplicatesStrategy.FAIL
 }
 
-task devJar(type: Jar) {
-    archiveClassifier.set("dev")
-    from sourceSets.main.output
-    subprojects.each {
-        dependsOn(it.tasks.devJar)
-        from (zipTree(it.tasks.devJar.archiveFile)) {
-            exclude "META-INF", "META-INF/**"
-        }
+def configureTarget(String prefix, Project... projects) {
+    Jar sourcesJar = (Jar) tasks.create(name: toCamelCase(prefix, "sourcesJar"), type: Jar) {
+        archiveClassifier.set("sources")
+        archiveAppendix.set(prefix)
+        from sourceSets.main.allSource
     }
-    duplicatesStrategy = DuplicatesStrategy.FAIL
-}
 
-jar {
-    subprojects.each {
-        dependsOn(it.tasks.finishCreateJar)
-        from (zipTree(it.tasks.jar.archiveFile)) {
-            exclude "META-INF", "META-INF/**"
-        }
+    Jar devJar = (Jar) tasks.create(name: toCamelCase(prefix, "devJar"), type: Jar, dependsOn: classes) {
+        archiveClassifier.set("dev")
+        archiveAppendix.set(prefix)
+        from sourceSets.main.output
     }
-    duplicatesStrategy = DuplicatesStrategy.FAIL
+
+    Jar jar
+    if (prefix != "") {
+        jar = (Jar)tasks.create(name: toCamelCase(prefix, "jar"), type: Jar, dependsOn: classes) {
+            archiveAppendix.set(prefix)
+            from sourceSets.main.output
+        }
+    } else {
+        jar = (Jar)tasks.getByName("jar")
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives devJar
+        archives jar
+    }
+
+    def projectList = projects.toList()
+    configureJar(sourcesJar, projectList, "sourcesJar")
+    configureJar(devJar, projectList, "devJar")
+    configureJar(jar, projectList, "finishCreateJar", "jar")
 }
 
-artifacts {
-    archives sourcesJar
-    archives devJar
-}
+configureTarget("", project("1710"), project("1122"))
+configureTarget("post1.13", project("1132"))

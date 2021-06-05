@@ -16,7 +16,7 @@ java {
 }
 
 minecraft {
-    mappings channel: 'snapshot', version: '20171003-1.12'
+    mappings channel: 'snapshot', version: '20180921-1.13'
 
     runs {
         server {
@@ -37,7 +37,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.12.2-${rootProject.forge_version_1122}"
+    minecraft "net.minecraftforge:forge:1.13.2-${rootProject.forge_version_1132}"
 }
 
 jar.finalizedBy('reobfJar')

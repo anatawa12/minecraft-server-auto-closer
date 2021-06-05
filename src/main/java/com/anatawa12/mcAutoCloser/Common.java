@@ -49,6 +49,7 @@ public abstract class Common {
     }
 
     public void onTick() {
+        if (waitTicks < 0) return;
         if (--waitTicks == -1) {
             sendStop();
             stopReceiveTicks();
@@ -59,8 +60,10 @@ public abstract class Common {
     private void findWait() {
         if (findWaitFile(new File("./config/minecraft-server-auto-closer.txt"))) return;
         if (findWaitFile(new File("./mods/minecraft-server-auto-closer.txt"))) return;
-        if (findWaitFile(new File("./mods/" + modFile.getName() + ".txt"))) return;
-        if (findInFileName(modFile.getName())) return;
+        if (modFile != null) {
+            if (findWaitFile(new File("./mods/" + modFile.getName() + ".txt"))) return;
+            if (findInFileName(modFile.getName())) return;
+        }
         ;
     }
 
@@ -116,8 +119,9 @@ public abstract class Common {
                 uri = uri.substring(0, uri.length() - classNamePath.length());
             }
             return new File(new java.net.URI(uri));
-        } catch (java.net.URISyntaxException e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
