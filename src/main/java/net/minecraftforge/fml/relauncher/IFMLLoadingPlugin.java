@@ -1,5 +1,10 @@
 package net.minecraftforge.fml.relauncher;
 
-// only for compatibility with 1.7
+// for compatibility with 1.7
 public interface IFMLLoadingPlugin {
+    String[] getASMTransformerClass();
+    String getModContainerClass();
+    String getSetupClass();
+    void injectData(java.util.Map<String, Object> data);
+    String getAccessTransformerClass();
 }
