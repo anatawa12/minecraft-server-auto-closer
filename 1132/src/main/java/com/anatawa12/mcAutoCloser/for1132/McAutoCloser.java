@@ -98,7 +98,7 @@ public class McAutoCloser extends Common implements ICommandSource {
                         "getWorld", "func_71218_a", 
                                 "getLevel", "func_71218_a"},
                         dimensionKeyClass, getField(dimensionTypeClass, null, 
-                                "OVERWORLD", 
+                                "OVERWORLD", "field_223227_a_",
                                 "OVERWORLD_LOCATION", "field_235999_c_")),
                 int.class, 4,
                 String.class, "McAutoCloser",
@@ -113,7 +113,7 @@ public class McAutoCloser extends Common implements ICommandSource {
     }
 
     // 1.16
-    public void func_145747_a(ITextComponent component, UUID _) {
+    public void func_145747_a(ITextComponent component, @SuppressWarnings("ForwardCompatibility") UUID _) {
         LOGGER.info("McAutoCloser: {}", component.getString());
     }
 
