@@ -1,0 +1,12 @@
+modLoader="javafml"
+loaderVersion="[25,)"
+license="MIT"
+
+[[mods]]
+modId="server-auto-closer"
+version="${version}"
+displayName="Server Auto Closer"
+displayURL="https://github.com/anatawa12/minecraft-server-auto-closer"
+credits="(c) anatawa12 and other contributors. released under MIT License"
+authors="anatawa12"
+description='A mod to close a server automatically'
