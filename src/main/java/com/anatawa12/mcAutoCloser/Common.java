@@ -2,6 +2,12 @@ package com.anatawa12.mcAutoCloser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -122,6 +128,117 @@ public abstract class Common {
         } catch (Throwable e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    protected static Class<?> findClass(String... names) {
+        if (names == null || names.length == 0)
+            throw new IllegalArgumentException("names");
+
+        List<Throwable> exceptions = null;
+        for (String name : names) {
+            try {
+                return Class.forName(name);
+            } catch (Throwable e) {
+                if (exceptions == null) exceptions = new ArrayList<Throwable>();
+                exceptions.add(e);
+            }
+        }
+        throw new RuntimeException("Cannot find class: " + exceptions);
+    }
+
+    protected static <O, T> T getField(Class<O> ownerClass, O owner, String... names) {
+        if (names == null || names.length == 0)
+            throw new IllegalArgumentException("names");
+
+        List<Throwable> exceptions = null;
+        for (String name : names) {
+            try {
+                Field field = ownerClass.getField(name);
+                //noinspection unchecked
+                return (T) field.get(owner);
+            } catch (IllegalAccessException e) {
+                if (exceptions == null) exceptions = new ArrayList<Throwable>();
+                exceptions.add(e);
+            } catch (NoSuchFieldException e) {
+                if (exceptions == null) exceptions = new ArrayList<Throwable>();
+                exceptions.add(e);
+            }
+        }
+        throw new RuntimeException("Cannot find field: " + exceptions);
+    }
+
+    protected static Method findMethod(Class<?> ownerClass, String[] names, Class<?>... types) {
+        if (names == null || names.length == 0)
+            throw new IllegalArgumentException("names");
+
+        List<Throwable> exceptions = null;
+        for (String name : names) {
+            try {
+                return ownerClass.getMethod(name, types);
+            } catch (NoSuchMethodException e) {
+                if (exceptions == null) exceptions = new ArrayList<Throwable>();
+                exceptions.add(e);
+            }
+        }
+        throw new RuntimeException("Cannot find method: " + exceptions);
+    }
+
+    protected static <O, T> T callMethod(Class<O> ownerClass, O owner, String[] names, Object... typeAndParams) {
+        if (typeAndParams == null || typeAndParams.length % 2 != 0)
+            throw new IllegalArgumentException("names");
+        if (names == null || names.length == 0)
+            throw new IllegalArgumentException("names");
+
+        Class<?>[] types = new Class<?>[typeAndParams.length / 2];
+        Object[] values = new Object[typeAndParams.length / 2];
+
+        for (int i = 0; i < types.length; i++) {
+            types[i] = (Class<?>) typeAndParams[i * 2];
+            values[i] = typeAndParams[i * 2 + 1];
+        }
+
+        List<Throwable> exceptions = null;
+        for (String name : names) {
+            try {
+                Method method = ownerClass.getMethod(name, types);
+                //noinspection unchecked
+                return (T) method.invoke(owner, values);
+            } catch (NoSuchMethodException e) {
+                if (exceptions == null) exceptions = new ArrayList<Throwable>();
+                exceptions.add(e);
+            } catch (IllegalAccessException e) {
+                if (exceptions == null) exceptions = new ArrayList<Throwable>();
+                exceptions.add(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new RuntimeException("Cannot find method: " + exceptions);
+    }
+
+    protected static <T> T createInstance(Class<T> ownerClass, Object... typeAndParams) {
+        if (typeAndParams == null || typeAndParams.length % 2 != 0)
+            throw new IllegalArgumentException("names");
+        Class<?>[] types = new Class<?>[typeAndParams.length / 2];
+        Object[] values = new Object[typeAndParams.length / 2];
+
+        for (int i = 0; i < types.length; i++) {
+            types[i] = (Class<?>) typeAndParams[i * 2];
+            values[i] = typeAndParams[i * 2 + 1];
+        }
+
+        try {
+            Constructor<T> constructor = ownerClass.getConstructor(types);
+            return constructor.newInstance(values);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 }
