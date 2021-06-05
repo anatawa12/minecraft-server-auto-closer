@@ -54,11 +54,15 @@ jobs:
         env:
           VERSION: ${{ matrix.version }}
         run: |
-          echo "::set-output name=version::${VERSION#*:}"
-          echo "::set-output name=appendix::${VERSION%%:*}"
+          MC_VERSION="${VERSION#*:}"
+          APPENDIX="${VERSION%%:*}"
+          JAR_NAME="$(ls libs | grep "^minecraft-server-auto-closer$APPENDIX-[0-9.]*.jar$")"
+          echo "::set-output name=mc_version::$MC_VERSION"
+          echo "::set-output name=appendix::$APPENDIX"
+          echo "::set-output name=jar_name::$JAR_NAME"
 
       - uses: anatawa12/minecraft-server-start-test@main
         with:
-          version: ${{ steps.configure_version.outputs.version }}
+          version: ${{ steps.configure_version.outputs.mc_version }}
           minecraft_server_auto_closer_path:
-            ./libs/minecraft-server-auto-closer${{ steps.configure_version.outputs.appendix }}-${{ steps.get_current_version.outputs.version_name }}.jar
+            ./libs/{{ steps.configure_version.outputs.jar_name }}
