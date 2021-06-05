@@ -24,6 +24,18 @@ subprojects {
     version = rootProject.version
     group = rootProject.group
 
+    if (project.name != "1710") {
+        sourceSets {
+            api {}
+        }
+        dependencies {
+            compileOnly(sourceSets.api.output)
+        }
+        configurations {
+            apiImplementation.extendsFrom(implementation)
+        }
+    }
+
     dependencies {
         implementation(rootProject.sourceSets.main.output)
     }
@@ -80,6 +92,13 @@ def configureJar(Jar task, List<Project> projects, String dependsOn, String arch
         }
     }
     task.duplicatesStrategy = DuplicatesStrategy.FAIL
+
+    task.manifest {
+        attributes(
+            FMLCorePlugin: "com.anatawa12.mcAutoCloser.for1122.asm.CoreMod",
+            FMLCorePluginContainsFMLMod: "*",
+        )
+    }
 }
 
 def configureTarget(String prefix, Project... projects) {
