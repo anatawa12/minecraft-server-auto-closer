@@ -53,7 +53,7 @@ jobs:
         id: configure_version
         env:
           VERSION: ${{ matrix.version }}
-        run:
+        run: |
           echo "::set-output name=version::${VERSION#*:}"
           echo "::set-output name=appendix::${VERSION%%:*}"
 
