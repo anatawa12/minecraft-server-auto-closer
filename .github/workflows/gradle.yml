@@ -19,8 +19,53 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew SetupCIWorkspace build
+      run: ./gradlew SetupCIWorkspace :build
     - uses: actions/upload-artifact@v2
       with:
         name: Package
         path: build/libs
+
+  test: 
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      matrix:
+        version:
+          - ':1.7.10-10.13.4.1614-1.7.10'
+          - ':1.8.9-11.15.1.2318-1.8.9'
+          - ':1.9.4-12.17.0.2317-1.9.4'
+          - ':1.10.2-12.18.3.2511'
+          # 1.11.2 can't be supported because installer was broken.
+          # - ':1.11.2-13.20.1.2588'
+          - ':1.12.2-14.23.5.2855'
+          - '-post1.13:1.13.2-25.0.219'
+          - '-post1.13:1.14.4-28.2.0'
+          - '-post1.13:1.15.2-31.2.0'
+          - '-post1.13:1.16.5-36.1.0'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: Package
+          path: libs
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Configure Version
+        id: configure_version
+        env:
+          VERSION: ${{ matrix.version }}
+        run: |
+          MC_VERSION="${VERSION#*:}"
+          APPENDIX="${VERSION%%:*}"
+          JAR_NAME="$(ls libs | grep "^minecraft-server-auto-closer$APPENDIX-[0-9.]*.jar$")"
+          echo "::set-output name=mc_version::$MC_VERSION"
+          echo "::set-output name=appendix::$APPENDIX"
+          echo "::set-output name=jar_name::$JAR_NAME"
+
+      - uses: anatawa12/minecraft-server-start-test@main
+        with:
+          version: ${{ steps.configure_version.outputs.mc_version }}
+          minecraft_server_auto_closer_path:
+            ./libs/${{ steps.configure_version.outputs.jar_name }}
