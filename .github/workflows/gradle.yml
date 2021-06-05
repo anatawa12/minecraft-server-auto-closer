@@ -65,4 +65,4 @@ jobs:
         with:
           version: ${{ steps.configure_version.outputs.mc_version }}
           minecraft_server_auto_closer_path:
-            ./libs/{{ steps.configure_version.outputs.jar_name }}
+            ./libs/${{ steps.configure_version.outputs.jar_name }}
