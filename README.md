@@ -1,5 +1,5 @@
 # minecraft server auto closer
-[![a12 maintenance: Slowly](https://anatawa12.com/short.php?q=a12-slowly-svg)](https://anatawa12.com/short.php?q=a12-slowly-doc)
+[![a12 maintenance: Slowly](https://api.anatawa12.com/short/a12-slowly-svg)](https://api.anatawa12.com/short/a12-slowly-doc)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/anatawa12/minecraft-server-auto-closer)](https://github.com/anatawa12/minecraft-server-auto-closer/releases/latest)
 
 A mod to automatically close a server after
