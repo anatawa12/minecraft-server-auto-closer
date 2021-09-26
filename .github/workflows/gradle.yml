@@ -64,7 +64,7 @@ jobs:
           echo "::set-output name=appendix::$APPENDIX"
           echo "::set-output name=jar_name::$JAR_NAME"
 
-      - uses: anatawa12/minecraft-server-start-test@main
+      - uses: anatawa12/minecraft-server-start-test@v1
         with:
           version: ${{ steps.configure_version.outputs.mc_version }}
           minecraft_server_auto_closer_path:
