@@ -1,12 +1,8 @@
 package com.anatawa12.mcAutoCloser.for1132;
 
 import com.anatawa12.mcAutoCloser.Common;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -18,7 +14,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
-import java.util.UUID;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
 
 @Mod(value = "server_auto_closer", modid = "server_auto_closer_dummy")
 public class McAutoCloser extends Common {
@@ -105,68 +104,131 @@ public class McAutoCloser extends Common {
         LOGGER.info(msg, args);
     }
 
-    protected static class SenderImpl implements ICommandSource {
+    protected static class SenderImpl {
         protected static SenderImpl INSTANCE = new SenderImpl();
 
         protected void sendStop() {
-            server.handleConsoleInput("stop", getCommandSource());
+            callMethod(DedicatedServer.class, server,
+                    new String[]{"handleConsoleInput", "func_195581_a", "m_139645_"},
+                    String.class, "stop",
+                    commandSource, getCommandSource());
         }
 
-        public CommandSource getCommandSource() {
+        Class<?> commandSource = findClass("net.minecraft.command.CommandSource", 
+                "net.minecraft.commands.CommandSourceStack");
+
+        public Object getCommandSource() {
+            Class<?> iCommandSource = findClass("net.minecraft.command.ICommandSource",
+                    "net.minecraft.commands.CommandSource");
             Class<?> vec3dClass = findClass("net.minecraft.util.math.Vec3d",
-                    "net.minecraft.util.math.vector.Vector3d");
+                    "net.minecraft.util.math.vector.Vector3d",
+                    "net.minecraft.world.phys.Vec3");
             Class<?> vec2fClass = findClass("net.minecraft.util.math.Vec2f",
-                    "net.minecraft.util.math.vector.Vector2f");
+                    "net.minecraft.util.math.vector.Vector2f",
+                    "net.minecraft.world.phys.Vec2");
             Class<?> worldServerClass = findClass("net.minecraft.world.WorldServer",
-                    "net.minecraft.world.server.ServerWorld");
+                    "net.minecraft.world.server.ServerWorld",
+                    "net.minecraft.server.level.ServerLevel");
             // the class to explain type of dimention
             Class<?> dimensionKeyClass = findClass("net.minecraft.world.dimension.DimensionType",
-                    "net.minecraft.util.RegistryKey");
+                    "net.minecraft.util.RegistryKey",
+                    "net.minecraft.resources.ResourceKey");
             // the class has dimention type name
             Class<?> dimensionTypeClass = findClass("net.minecraft.world.dimension.DimensionType",
-                    "net.minecraft.world.DimensionType");
+                    "net.minecraft.world.DimensionType",
+                    "net.minecraft.world.level.dimension.DimensionType");
+            Class<?> iTextComponent = findClass("net.minecraft.util.text.ITextComponent",
+                    "net.minecraft.network.chat.Component");
             Class<?> textComponentString = findClass("net.minecraft.util.text.TextComponentString",
-                    "net.minecraft.util.text.StringTextComponent");
+                    "net.minecraft.util.text.StringTextComponent",
+                    "net.minecraft.network.chat.TextComponent");
+            Class<?> entity = findClass("net.minecraft.entity.Entity",
+                    "net.minecraft.world.entity.Entity");
 
-            return createInstance(CommandSource.class,
-                    ICommandSource.class, this,
-                    vec3dClass, getField(vec3dClass, null, "ZERO", "field_186680_a"),
-                    vec2fClass, getField(vec2fClass, null, "ZERO", "field_189974_a"),
+            Object sourceImpl = Proxy.newProxyInstance(iCommandSource.getClassLoader(), new Class[]{iCommandSource},
+                    new InvocationHandlerImpl());
+
+            return createInstance(commandSource,
+                    iCommandSource, sourceImpl,
+                    vec3dClass, getField(vec3dClass, null, "ZERO", "field_186680_a", "f_82478_"),
+                    vec2fClass, getField(vec2fClass, null, "ZERO", "field_189974_a", "f_82462_"),
                     worldServerClass, callMethod(DedicatedServer.class, server, new String[]{
                                     "getWorld", "func_71218_a",
-                                    "getLevel", "func_71218_a"},
+                                    "getLevel", "func_71218_a", "m_129880_"},
                             dimensionKeyClass, getField(dimensionTypeClass, null,
                                     "OVERWORLD", "field_223227_a_",
-                                    "OVERWORLD_LOCATION", "field_235999_c_")),
+                                    "OVERWORLD_LOCATION", "field_235999_c_", "f_63845_")),
                     int.class, 4,
                     String.class, "McAutoCloser",
-                    ITextComponent.class, createInstance(textComponentString, String.class, "McAutoCloser"),
+                    iTextComponent, createInstance(textComponentString, String.class, "McAutoCloser"),
                     MinecraftServer.class, server,
-                    Entity.class, null);
+                    entity, null);
         }
 
-        @Override
-        public void sendMessage(@Nonnull ITextComponent component) {
-            LOGGER.info("McAutoCloser: {}", component.getString());
+        private class InvocationHandlerImpl implements InvocationHandler {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                try {
+                    Class<?>[] classes = new Class<?>[method.getParameterCount()];
+                    Arrays.fill(classes, Object.class);
+                    return SenderImpl.class.getMethod(method.getName(), classes)
+                            .invoke(SenderImpl.this, args);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    throw t;
+                }
+            }
+        }
+
+        // sendMessage
+        @SuppressWarnings("unchecked")
+        public void func_145747_a(@Nonnull Object component) {
+            LOGGER.info("McAutoCloser: {}",
+                    (Object) callMethod((Class<Object>) component.getClass(), component, new String[]{"getString"}));
         }
 
         // 1.16
-        public void func_145747_a(ITextComponent component, @SuppressWarnings("ForwardCompatibility") UUID _) {
-            LOGGER.info("McAutoCloser: {}", component.getString());
+        public void func_145747_a(Object component, @SuppressWarnings("ForwardCompatibility") Object _) {
+            func_145747_a(component);
         }
 
-        @Override
-        public boolean shouldReceiveFeedback() {
+        // 1.17 sendMessage
+        public void m_6352_(Object component, @SuppressWarnings("ForwardCompatibility") Object _) {
+            func_145747_a(component);
+        }
+
+        // shouldReceiveFeedback
+        public boolean func_195039_a() {
             return true;
         }
 
-        @Override
-        public boolean shouldReceiveErrors() {
+        // 1.17: acceptsSuccess
+        public boolean m_6999_() {
             return true;
         }
 
-        @Override
-        public boolean allowLogging() {
+        // shouldReceiveErrors
+        public boolean func_195040_b() {
+            return true;
+        }
+
+        // 1.17: acceptsFailure
+        public boolean m_7028_() {
+            return true;
+        }
+
+        // allowLogging
+        public boolean func_195041_r_() {
+            return true;
+        }
+
+        // 1.17: shouldInformAdmins
+        public boolean m_6102_() {
+            return true;
+        }
+
+        // 1.17: alwaysAccepts
+        public boolean m_142559_() {
             return true;
         }
     }
