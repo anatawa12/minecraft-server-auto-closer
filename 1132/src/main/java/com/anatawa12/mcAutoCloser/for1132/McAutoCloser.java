@@ -13,7 +13,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +38,8 @@ public class McAutoCloser extends Common {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(listeners::dedicatedServerSetup);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false,
                 listeners.classFMLServerStartedEvent, listeners::serverStarted);
-        MinecraftForge.EVENT_BUS.addListener(listeners::serverStopping);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false,
+                listeners.classFMLServerStoppedEvent, listeners::serverStopping);
     }
 
 
@@ -50,9 +50,20 @@ public class McAutoCloser extends Common {
 
         @SuppressWarnings("unchecked")
         private final Class<Event> classFMLServerStartedEvent = (Class<Event>) findClass(
-                "net.minecraftforge.fml.event.server.FMLServerStartedEvent", 
+                "net.minecraftforge.fml.event.server.FMLServerStartedEvent",
                 "net.minecraftforge.fmlserverevents.FMLServerStartedEvent",
                 "net.minecraftforge.event.server.ServerStartedEvent");
+
+        @SuppressWarnings("unchecked")
+        private final Class<Event> classFMLServerStoppedEvent = (Class<Event>) findClass(
+                "net.minecraftforge.fml.event.server.FMLServerStoppedEvent",
+                "net.minecraftforge.fmlserverevents.FMLServerStoppedEvent",
+                "net.minecraftforge.event.server.ServerStoppedEvent");
+
+        @SuppressWarnings("unchecked")
+        private final Class<Event> classTickEvent$ServerTickEvent = (Class<Event>) findClass(
+                "net.minecraftforge.fml.common.gameevent.TickEvent$ServerTickEvent",
+                "net.minecraftforge.event.TickEvent$ServerTickEvent");
 
         // You can use SubscribeEvent and let the Event Bus discover methods to call
         public void serverStarted(Event event) {
@@ -63,12 +74,12 @@ public class McAutoCloser extends Common {
             onServerStarted();
         }
 
-        public void serverStopping(FMLServerStoppedEvent event) {
+        public void serverStopping(Event event) {
             server = null;
         }
 
-        public void tick(TickEvent.ServerTickEvent event) {
-            if (event.phase != TickEvent.Phase.START) return;
+        public void tick(Event event) {
+            if (getField(classTickEvent$ServerTickEvent, event, "phase") != TickEvent.Phase.START) return;
             onTick();
         }
     }
@@ -85,6 +96,8 @@ public class McAutoCloser extends Common {
 
     @Override
     protected void stopReceiveTicks() {
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false,
+                listeners.classTickEvent$ServerTickEvent, listeners::tick);
     }
 
     @Override
