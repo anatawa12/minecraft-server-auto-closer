@@ -7,13 +7,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +37,8 @@ public class McAutoCloser extends Common {
         }
         listeners = new Listeners();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(listeners::dedicatedServerSetup);
-        MinecraftForge.EVENT_BUS.addListener(listeners::serverStarted);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false,
+                listeners.classFMLServerStartedEvent, listeners::serverStarted);
         MinecraftForge.EVENT_BUS.addListener(listeners::serverStopping);
     }
 
@@ -48,11 +48,17 @@ public class McAutoCloser extends Common {
             isServer = true;
         }
 
+        @SuppressWarnings("unchecked")
+        private Class<Event> classFMLServerStartedEvent = (Class<Event>) findClass(
+                "net.minecraftforge.fml.event.server.FMLServerStartedEvent", 
+                "net.minecraftforge.fmlserverevents.FMLServerStartedEvent");
+
         // You can use SubscribeEvent and let the Event Bus discover methods to call
-        public void serverStarted(FMLServerStartedEvent event) {
+        public void serverStarted(Event event) {
             if (!isServer) return;
-            if (!(event.getServer() instanceof DedicatedServer)) return;
-            server = (DedicatedServer) event.getServer();
+            Object mayServer = callMethod(classFMLServerStartedEvent, event, new String[]{"getServer"});
+            if (!(mayServer instanceof DedicatedServer)) return;
+            server = (DedicatedServer) mayServer;
             onServerStarted();
         }
 
