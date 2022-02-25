@@ -27,7 +27,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-@Mod(modid = "server-auto-closer", value = "server-auto-closer-dummy")
+@Mod(modid = "server_auto_closer", value = "server_auto_closer_dummy")
 @SuppressWarnings({"unused", "NullableProblems"})
 public class McAutoCloser extends Common {
     private static final Logger LOGGER = LogManager.getLogger("McAutoCloser");

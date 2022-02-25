@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.util.Map;
 
-@Mod(modid = "server-auto-closer")
+@Mod(modid = "server_auto_closer")
 @SuppressWarnings("unused")
 public class McAutoCloser extends Common implements ICommandSender {
     private static final Logger LOGGER = LogManager.getLogger("McAutoCloser");

@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-@Mod(value = "server-auto-closer", modid = "server-auto-closer-dummy")
+@Mod(value = "server_auto_closer", modid = "server_auto_closer_dummy")
 public class McAutoCloser extends Common {
     private static final Logger LOGGER = LogManager.getLogger("McAutoCloser");
     private static boolean isServer;

@@ -1,6 +1,6 @@
 [
 {
-  "modid": "server-auto-closer",
+  "modid": "server_auto_closer",
   "name": "Server Auto Closer",
   "description": "A mod to close a server automatically",
   "version": "${version}",
