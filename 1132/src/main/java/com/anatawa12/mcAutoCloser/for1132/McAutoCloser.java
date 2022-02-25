@@ -49,9 +49,10 @@ public class McAutoCloser extends Common {
         }
 
         @SuppressWarnings("unchecked")
-        private Class<Event> classFMLServerStartedEvent = (Class<Event>) findClass(
+        private final Class<Event> classFMLServerStartedEvent = (Class<Event>) findClass(
                 "net.minecraftforge.fml.event.server.FMLServerStartedEvent", 
-                "net.minecraftforge.fmlserverevents.FMLServerStartedEvent");
+                "net.minecraftforge.fmlserverevents.FMLServerStartedEvent",
+                "net.minecraftforge.event.server.ServerStartedEvent");
 
         // You can use SubscribeEvent and let the Event Bus discover methods to call
         public void serverStarted(Event event) {
