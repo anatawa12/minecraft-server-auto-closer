@@ -10,3 +10,12 @@ displayURL="https://github.com/anatawa12/minecraft-server-auto-closer"
 credits="(c) anatawa12 and other contributors. released under MIT License"
 authors="anatawa12"
 description='A mod to close a server automatically'
+
+[[mods]]
+modId="server-auto-closer-dummy"
+version="${version}"
+displayName="A dummy mod of Server Auto Closer for 1.12.2"
+displayURL="https://github.com/anatawa12/minecraft-server-auto-closer"
+credits="(c) anatawa12 and other contributors. released under MIT License"
+authors="anatawa12"
+description='A mod to close a server automatically'

@@ -22,47 +22,58 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-@Mod("server-auto-closer")
-public class McAutoCloser extends Common implements ICommandSource {
+@Mod(value = "server-auto-closer", modid = "server-auto-closer-dummy")
+public class McAutoCloser extends Common {
     private static final Logger LOGGER = LogManager.getLogger("McAutoCloser");
     private static boolean isServer;
     private static DedicatedServer server;
+    private static Listeners listeners;
 
     public McAutoCloser() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::dedicatedServerSetup);
-        MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
-        MinecraftForge.EVENT_BUS.addListener(this::serverStopping);
+        try {
+            // 1.12.2 block
+            Class.forName("net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext");
+        } catch (ClassNotFoundException e) {
+            return;
+        }
+        listeners = new Listeners();
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(listeners::dedicatedServerSetup);
+        MinecraftForge.EVENT_BUS.addListener(listeners::serverStarted);
+        MinecraftForge.EVENT_BUS.addListener(listeners::serverStopping);
     }
 
-    public void dedicatedServerSetup(FMLDedicatedServerSetupEvent event) {
-        isServer = true;
-    }
 
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
-    public void serverStarted(FMLServerStartedEvent event) {
-        if (!isServer) return;
-        if (!(event.getServer() instanceof DedicatedServer)) return;
-        server = (DedicatedServer) event.getServer();
-        onServerStarted();
-    }
+    final class Listeners {
+        public void dedicatedServerSetup(FMLDedicatedServerSetupEvent event) {
+            isServer = true;
+        }
 
-    public void serverStopping(FMLServerStoppedEvent event) {
-        server = null;
-    }
+        // You can use SubscribeEvent and let the Event Bus discover methods to call
+        public void serverStarted(FMLServerStartedEvent event) {
+            if (!isServer) return;
+            if (!(event.getServer() instanceof DedicatedServer)) return;
+            server = (DedicatedServer) event.getServer();
+            onServerStarted();
+        }
 
-    public void tick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
-        onTick();
+        public void serverStopping(FMLServerStoppedEvent event) {
+            server = null;
+        }
+
+        public void tick(TickEvent.ServerTickEvent event) {
+            if (event.phase != TickEvent.Phase.START) return;
+            onTick();
+        }
     }
 
     @Override
     protected void sendStop() {
-        server.handleConsoleInput("stop", getCommandSource());
+        SenderImpl.INSTANCE.sendStop();
     }
 
     @Override
     protected void startReceiveTicks() {
-        MinecraftForge.EVENT_BUS.addListener(this::tick);
+        MinecraftForge.EVENT_BUS.addListener(listeners::tick);
     }
 
     @Override
@@ -74,61 +85,69 @@ public class McAutoCloser extends Common implements ICommandSource {
         LOGGER.info(msg, args);
     }
 
-    public CommandSource getCommandSource() {
-        Class<?> vec3dClass = findClass("net.minecraft.util.math.Vec3d",
-                "net.minecraft.util.math.vector.Vector3d");
-        Class<?> vec2fClass = findClass("net.minecraft.util.math.Vec2f",
-                "net.minecraft.util.math.vector.Vector2f");
-        Class<?> worldServerClass = findClass("net.minecraft.world.WorldServer",
-                "net.minecraft.world.server.ServerWorld");
-        // the class to explain type of dimention
-        Class<?> dimensionKeyClass = findClass("net.minecraft.world.dimension.DimensionType",
-                "net.minecraft.util.RegistryKey");
-        // the class has dimention type name
-        Class<?> dimensionTypeClass = findClass("net.minecraft.world.dimension.DimensionType",
-                "net.minecraft.world.DimensionType");
-        Class<?> textComponentString = findClass("net.minecraft.util.text.TextComponentString",
-                "net.minecraft.util.text.StringTextComponent");
+    protected static class SenderImpl implements ICommandSource {
+        protected static SenderImpl INSTANCE = new SenderImpl();
 
-        return createInstance(CommandSource.class,
-                ICommandSource.class, this,
-                vec3dClass, getField(vec3dClass, null, "ZERO", "field_186680_a"),
-                vec2fClass, getField(vec2fClass, null, "ZERO", "field_189974_a"),
-                worldServerClass, callMethod(DedicatedServer.class, server, new String[]{
-                        "getWorld", "func_71218_a", 
-                                "getLevel", "func_71218_a"},
-                        dimensionKeyClass, getField(dimensionTypeClass, null, 
-                                "OVERWORLD", "field_223227_a_",
-                                "OVERWORLD_LOCATION", "field_235999_c_")),
-                int.class, 4,
-                String.class, "McAutoCloser",
-                ITextComponent.class, createInstance(textComponentString, String.class, "McAutoCloser"),
-                MinecraftServer.class, server,
-                Entity.class, null);
-    }
+        protected void sendStop() {
+            server.handleConsoleInput("stop", getCommandSource());
+        }
 
-    @Override
-    public void sendMessage(@Nonnull ITextComponent component) {
-        LOGGER.info("McAutoCloser: {}", component.getString());
-    }
+        public CommandSource getCommandSource() {
+            Class<?> vec3dClass = findClass("net.minecraft.util.math.Vec3d",
+                    "net.minecraft.util.math.vector.Vector3d");
+            Class<?> vec2fClass = findClass("net.minecraft.util.math.Vec2f",
+                    "net.minecraft.util.math.vector.Vector2f");
+            Class<?> worldServerClass = findClass("net.minecraft.world.WorldServer",
+                    "net.minecraft.world.server.ServerWorld");
+            // the class to explain type of dimention
+            Class<?> dimensionKeyClass = findClass("net.minecraft.world.dimension.DimensionType",
+                    "net.minecraft.util.RegistryKey");
+            // the class has dimention type name
+            Class<?> dimensionTypeClass = findClass("net.minecraft.world.dimension.DimensionType",
+                    "net.minecraft.world.DimensionType");
+            Class<?> textComponentString = findClass("net.minecraft.util.text.TextComponentString",
+                    "net.minecraft.util.text.StringTextComponent");
 
-    // 1.16
-    public void func_145747_a(ITextComponent component, @SuppressWarnings("ForwardCompatibility") UUID _) {
-        LOGGER.info("McAutoCloser: {}", component.getString());
-    }
+            return createInstance(CommandSource.class,
+                    ICommandSource.class, this,
+                    vec3dClass, getField(vec3dClass, null, "ZERO", "field_186680_a"),
+                    vec2fClass, getField(vec2fClass, null, "ZERO", "field_189974_a"),
+                    worldServerClass, callMethod(DedicatedServer.class, server, new String[]{
+                                    "getWorld", "func_71218_a",
+                                    "getLevel", "func_71218_a"},
+                            dimensionKeyClass, getField(dimensionTypeClass, null,
+                                    "OVERWORLD", "field_223227_a_",
+                                    "OVERWORLD_LOCATION", "field_235999_c_")),
+                    int.class, 4,
+                    String.class, "McAutoCloser",
+                    ITextComponent.class, createInstance(textComponentString, String.class, "McAutoCloser"),
+                    MinecraftServer.class, server,
+                    Entity.class, null);
+        }
 
-    @Override
-    public boolean shouldReceiveFeedback() {
-        return true;
-    }
+        @Override
+        public void sendMessage(@Nonnull ITextComponent component) {
+            LOGGER.info("McAutoCloser: {}", component.getString());
+        }
 
-    @Override
-    public boolean shouldReceiveErrors() {
-        return true;
-    }
+        // 1.16
+        public void func_145747_a(ITextComponent component, @SuppressWarnings("ForwardCompatibility") UUID _) {
+            LOGGER.info("McAutoCloser: {}", component.getString());
+        }
 
-    @Override
-    public boolean allowLogging() {
-        return true;
+        @Override
+        public boolean shouldReceiveFeedback() {
+            return true;
+        }
+
+        @Override
+        public boolean shouldReceiveErrors() {
+            return true;
+        }
+
+        @Override
+        public boolean allowLogging() {
+            return true;
+        }
     }
 }
