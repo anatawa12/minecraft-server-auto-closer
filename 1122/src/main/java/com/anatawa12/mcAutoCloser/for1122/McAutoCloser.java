@@ -27,9 +27,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-@Mod(modid = "server-auto-closer")
+@Mod(modid = "server-auto-closer", value = "server-auto-closer-dummy")
 @SuppressWarnings({"unused", "NullableProblems"})
-public class McAutoCloser extends Common implements ICommandSender {
+public class McAutoCloser extends Common {
     private static final Logger LOGGER = LogManager.getLogger("McAutoCloser");
 
     // single side mod
@@ -52,8 +52,7 @@ public class McAutoCloser extends Common implements ICommandSender {
     }
 
     protected void sendStop() {
-        MinecraftServer instance = FMLCommonHandler.instance().getMinecraftServerInstance();
-        ((DedicatedServer) instance).addPendingCommand("stop", this);
+        SenderImpl.INSTANCE.sendStop();
     }
 
     @Override
@@ -71,62 +70,70 @@ public class McAutoCloser extends Common implements ICommandSender {
         LOGGER.info(msg, args);
     }
 
-    @Override
-    @Nonnull
-    
-    public String getName() {
-        return "McAutoCloser";
-    }
+    final static class SenderImpl implements ICommandSender {
+        static SenderImpl INSTANCE = new SenderImpl();
 
-    @Override
-    public ITextComponent getDisplayName() {
-        return new TextComponentString(this.getName());
-    }
+        void sendStop() {
+            MinecraftServer instance = FMLCommonHandler.instance().getMinecraftServerInstance();
+            ((DedicatedServer) instance).addPendingCommand("stop", this);
+        }
 
-    @Override
-    public void sendMessage(ITextComponent component) {
-        // 1.8 compatibility
-        LOGGER.info("McAutoCloser: {}", new Object[]{component.getUnformattedText()});
-    }
+        @Override
+        @Nonnull
+        public String getName() {
+            return "McAutoCloser";
+        }
 
-    public void setCommandStat(CommandResultStats.Type type, int amount) {
-    }
+        @Override
+        public ITextComponent getDisplayName() {
+            return new TextComponentString(this.getName());
+        }
 
-    @Override
-    public boolean canUseCommand(int permLevel, @Nonnull String commandName) {
-        return true;
-    }
+        @Override
+        public void sendMessage(ITextComponent component) {
+            // 1.8 compatibility
+            LOGGER.info("McAutoCloser: {}", new Object[]{component.getUnformattedText()});
+        }
 
-    @Override
-    public BlockPos getPosition() {
-        return BlockPos.ORIGIN;
-    }
+        public void setCommandStat(CommandResultStats.Type type, int amount) {
+        }
 
-    @Override
-    public Vec3d getPositionVector() {
-        return Vec3d.ZERO;
-    }
+        @Override
+        public boolean canUseCommand(int permLevel, @Nonnull String commandName) {
+            return true;
+        }
 
-    @Override
-    @Nonnull
-    public World getEntityWorld() {
-        return FMLCommonHandler.instance().getMinecraftServerInstance().worlds[0];
-    }
+        @Override
+        public BlockPos getPosition() {
+            return BlockPos.ORIGIN;
+        }
 
-    @Nullable
-    @Override
-    public Entity getCommandSenderEntity() {
-        return null;
-    }
+        @Override
+        public Vec3d getPositionVector() {
+            return Vec3d.ZERO;
+        }
 
-    @Override
-    public boolean sendCommandFeedback() {
-        return false;
-    }
+        @Override
+        @Nonnull
+        public World getEntityWorld() {
+            return FMLCommonHandler.instance().getMinecraftServerInstance().worlds[0];
+        }
 
-    @Nullable
-    @Override
-    public MinecraftServer getServer() {
-        return FMLCommonHandler.instance().getMinecraftServerInstance();
+        @Nullable
+        @Override
+        public Entity getCommandSenderEntity() {
+            return null;
+        }
+
+        @Override
+        public boolean sendCommandFeedback() {
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public MinecraftServer getServer() {
+            return FMLCommonHandler.instance().getMinecraftServerInstance();
+        }
     }
 }

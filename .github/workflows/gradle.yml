@@ -13,9 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v2
       with:
-        java-version: 1.8
+        distribution: 'temurin'
+        java-version: 8
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
@@ -37,11 +38,11 @@ jobs:
           - ':1.10.2-12.18.3.2511'
           # 1.11.2 can't be supported because installer was broken.
           # - ':1.11.2-13.20.1.2588'
-          - ':1.12.2-14.23.5.2855'
-          - '-post1.13:1.13.2-25.0.219'
-          - '-post1.13:1.14.4-28.2.0'
-          - '-post1.13:1.15.2-31.2.0'
-          - '-post1.13:1.16.5-36.1.0'
+          - ':1.12.2-14.23.5.2860'
+          - ':1.13.2-25.0.223'
+          - ':1.14.4-28.2.26'
+          - ':1.15.2-31.2.57'
+          - ':1.16.5-36.2.29'
     steps:
       - uses: actions/download-artifact@v2
         with:
