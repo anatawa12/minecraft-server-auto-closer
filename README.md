@@ -20,9 +20,16 @@ you can configure this by several ways.
 
 This mod finds `minecraft-server-auto-closer.txt`
 in `config` folder. The content must be `{number} seconds`
-or `{number} ticks`. When parse error, the file
+, `{number} ticks`, or `beofre {token}`. When parse error, the file
 will be ignored.
-If found, this mod waits specified ticks or seconds
+If ``before {token}`` is found, the server will be stopped
+before something based on `{token}`. Current supported `{token}`s are shown below:
+
+| `{token}` | when                      |
+| :-------: |:--------------------------|
+| `world`   | Stop before world loading | 
+
+If found `{number} {unit}`, this mod waits specified ticks or seconds
 before sends `stop` command.
 
 ### 2nd way: From file in mods directory
