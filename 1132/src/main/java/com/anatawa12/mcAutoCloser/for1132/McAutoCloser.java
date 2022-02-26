@@ -14,6 +14,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -32,6 +33,7 @@ public class McAutoCloser extends Common {
     public McAutoCloser() {
         listeners = new Listeners();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(listeners::dedicatedServerSetup);
+        MinecraftForge.EVENT_BUS.addListener(listeners::serverAboutToStart);
         MinecraftForge.EVENT_BUS.addListener(listeners::serverStarted);
         MinecraftForge.EVENT_BUS.addListener(listeners::serverStopping);
     }
@@ -42,6 +44,13 @@ public class McAutoCloser extends Common {
         private final Class<Event> classTickEvent$ServerTickEvent = (Class<Event>) findClass(
                 "net.minecraftforge.fml.common.gameevent.TickEvent$ServerTickEvent",
                 "net.minecraftforge.event.TickEvent$ServerTickEvent");
+
+        // You can use SubscribeEvent and let the Event Bus discover methods to call
+        public void serverAboutToStart(FMLServerAboutToStartEvent event) {
+            if (onAboutToStart()) {
+                event.setCanceled(true);
+            }
+        }
 
         public void dedicatedServerSetup(FMLDedicatedServerSetupEvent event) {
             isServer = true;
