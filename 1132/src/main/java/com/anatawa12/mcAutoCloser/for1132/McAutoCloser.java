@@ -22,7 +22,6 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-@Mod(value = "server_auto_closer", modid = "server_auto_closer_dummy")
 public class McAutoCloser extends Common {
     private static final Logger LOGGER = LogManager.getLogger("McAutoCloser");
     private static boolean isServer;
@@ -30,12 +29,6 @@ public class McAutoCloser extends Common {
     private static Listeners listeners;
 
     public McAutoCloser() {
-        try {
-            // 1.12.2 block
-            Class.forName("net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext");
-        } catch (ClassNotFoundException e) {
-            return;
-        }
         listeners = new Listeners();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(listeners::dedicatedServerSetup);
         MinecraftForge.EVENT_BUS.addListener(listeners::serverStarted);

@@ -136,5 +136,13 @@ def configureTarget(String prefix, Project... projects) {
     configureJar(jar, projectList, "finishCreateJar", "jar")
 }
 
-configureTarget("", project("1710"), project("1122"), project("1132"))
-configureTarget("post1.13", project("1710"), project("1122"), project("1132"))
+ def projects = [
+        project("1710"),
+        project("1122"),
+        project("1132later"),
+        project("1132"),
+        project("1171"),
+]
+
+configureTarget("", *projects)
+configureTarget("post1.13", *projects)

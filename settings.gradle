@@ -2,3 +2,5 @@ rootProject.name = 'minecraft-server-auto-closer'
 include("1710")
 include("1122")
 include("1132")
+include("1132later")
+include("1171")
