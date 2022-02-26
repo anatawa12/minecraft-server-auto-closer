@@ -3,7 +3,7 @@ loaderVersion="[25,)"
 license="MIT"
 
 [[mods]]
-modId="server-auto-closer"
+modId="server_auto_closer"
 version="${version}"
 displayName="Server Auto Closer"
 displayURL="https://github.com/anatawa12/minecraft-server-auto-closer"
@@ -12,7 +12,7 @@ authors="anatawa12"
 description='A mod to close a server automatically'
 
 [[mods]]
-modId="server-auto-closer-dummy"
+modId="server_auto_closer_dummy"
 version="${version}"
 displayName="A dummy mod of Server Auto Closer for 1.12.2"
 displayURL="https://github.com/anatawa12/minecraft-server-auto-closer"

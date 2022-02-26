@@ -10,7 +10,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
@@ -22,7 +21,6 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-@Mod(value = "server-auto-closer", modid = "server-auto-closer-dummy")
 public class McAutoCloser extends Common {
     private static final Logger LOGGER = LogManager.getLogger("McAutoCloser");
     private static boolean isServer;
@@ -30,12 +28,6 @@ public class McAutoCloser extends Common {
     private static Listeners listeners;
 
     public McAutoCloser() {
-        try {
-            // 1.12.2 block
-            Class.forName("net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext");
-        } catch (ClassNotFoundException e) {
-            return;
-        }
         listeners = new Listeners();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(listeners::dedicatedServerSetup);
         MinecraftForge.EVENT_BUS.addListener(listeners::serverStarted);

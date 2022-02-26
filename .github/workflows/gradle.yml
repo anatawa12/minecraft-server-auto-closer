@@ -32,38 +32,41 @@ jobs:
     strategy:
       matrix:
         version:
-          - ':1.7.10-10.13.4.1614-1.7.10'
-          - ':1.8.9-11.15.1.2318-1.8.9'
-          - ':1.9.4-12.17.0.2317-1.9.4'
-          - ':1.10.2-12.18.3.2511'
+          - '8:1.7.10-10.13.4.1614-1.7.10'
+          - '8:1.8.9-11.15.1.2318-1.8.9'
+          - '8:1.9.4-12.17.0.2317-1.9.4'
+          - '8:1.10.2-12.18.3.2511'
           # 1.11.2 can't be supported because installer was broken.
-          # - ':1.11.2-13.20.1.2588'
-          - ':1.12.2-14.23.5.2860'
-          - ':1.13.2-25.0.223'
-          - ':1.14.4-28.2.26'
-          - ':1.15.2-31.2.57'
-          - ':1.16.5-36.2.29'
+          # - '8:1.11.2-13.20.1.2588'
+          - '8:1.12.2-14.23.5.2860'
+          - '8:1.13.2-25.0.223'
+          - '8:1.14.4-28.2.26'
+          - '8:1.15.2-31.2.57'
+          - '8:1.16.5-36.2.29'
+          - '17:1.17.1-37.1.1'
+          - '17:1.18.1-39.0.88'
     steps:
       - uses: actions/download-artifact@v2
         with:
           name: Package
           path: libs
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
-
       - name: Configure Version
         id: configure_version
         env:
           VERSION: ${{ matrix.version }}
         run: |
           MC_VERSION="${VERSION#*:}"
-          APPENDIX="${VERSION%%:*}"
-          JAR_NAME="$(ls libs | grep "^minecraft-server-auto-closer$APPENDIX-[0-9.]*.jar$")"
+          JAVA_VERSION="${VERSION%%:*}"
+          JAR_NAME="$(ls libs | grep "^minecraft-server-auto-closer-[0-9.]*.jar$")"
+          echo "::set-output name=java_version::$JAVA_VERSION"
           echo "::set-output name=mc_version::$MC_VERSION"
-          echo "::set-output name=appendix::$APPENDIX"
           echo "::set-output name=jar_name::$JAR_NAME"
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: ${{ steps.configure_version.outputs.java_version }}
 
       - uses: anatawa12/minecraft-server-start-test@v1
         with:

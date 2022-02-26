@@ -10,13 +10,11 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle'
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
+// Mojang ships Java 16 to end users in 1.17+ instead of Java 8 in 1.16 or lower, so your mod should target Java 16.
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 minecraft {
-    mappings channel: 'snapshot', version: '20180921-1.13'
+    mappings channel: 'official', version: '1.17.1'
 
     runs {
         server {
@@ -37,7 +35,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.13.2-${rootProject.forge_version_1132}"
+    minecraft "net.minecraftforge:forge:1.17.1-${rootProject.forge_version_1171}"
 }
 
 jar.finalizedBy('reobfJar')
