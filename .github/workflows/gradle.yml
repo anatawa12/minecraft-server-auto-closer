@@ -21,6 +21,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew SetupCIWorkspace :build
+    - name: copy world file
+      run: cp ci/world.zip build/libs/world.zip
     - uses: actions/upload-artifact@v2
       with:
         name: Package
@@ -73,9 +75,13 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ steps.configure_version.outputs.java_version }}
 
+      - name: decompress world file
+        run: unzip libs/world.zip
+
       - uses: anatawa12/minecraft-server-start-test@v1
         with:
           version: ${{ steps.configure_version.outputs.mc_version }}
           sleep_time: ${{ matrix.sleep_time }}
+          world_data: ./world
           minecraft_server_auto_closer_path:
             ./libs/${{ steps.configure_version.outputs.jar_name }}
