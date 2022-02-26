@@ -61,7 +61,7 @@ public class McAutoCloser extends Common {
         // You can use SubscribeEvent and let the Event Bus discover methods to call
         public void serverAboutToStart(Event event) {
             if (onAboutToStart()) {
-                event.setResult(Event.Result.DENY);
+                event.setCanceled(true);
             }
         }
 
