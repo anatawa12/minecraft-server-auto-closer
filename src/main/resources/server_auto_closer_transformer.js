@@ -5,6 +5,7 @@ function initializeCoreMod() {
                 type: 'CLASS',
                 names: function () {
                     return [
+                        'net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent',
                         'net.minecraftforge.fmlserverevents.FMLServerAboutToStartEvent',
                         'net.minecraftforge.event.server.ServerAboutToStartEvent',
                     ]
