@@ -17,6 +17,7 @@ public abstract class Common {
     private static Common instance;
     private static final File modFile = getClassSourceOf(Common.class);
     private static boolean beforeWorldGen = false;
+    private static boolean loaded = false;
     private static int waitTicks = 0;
     private static int waitSeconds = 0;
 
@@ -34,6 +35,7 @@ public abstract class Common {
         waitTicks = 0;
         waitSeconds = 0;
         instance.findWait();
+        loaded = true;
         if (beforeWorldGen) {
             instance.infoLog("requested to stop before world generation!");
             return true;
@@ -43,6 +45,7 @@ public abstract class Common {
     }
 
     public void onServerStarted() {
+        if (!loaded) throw new IllegalStateException("config not loaded");
         if (beforeWorldGen) {
             throw new IllegalStateException("requested to stop before world generation but world was generated!");
         }
