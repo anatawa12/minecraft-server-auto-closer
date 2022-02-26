@@ -106,7 +106,7 @@ public abstract class Common {
                     beforeWorldGen = true;
                     return true;
                 }
-                return false;
+                throw new IllegalStateException("invalid stop time: before " + token);
             }
             int count = sc.nextInt();
             if (count < 0) return false;
