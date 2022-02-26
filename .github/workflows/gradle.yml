@@ -31,6 +31,9 @@ jobs:
     needs: build
     strategy:
       matrix:
+        sleep_time:
+          - '0s'
+          - '2s'
         version:
           - '8:1.7.10-10.13.4.1614-1.7.10'
           - '8:1.8.9-11.15.1.2318-1.8.9'
@@ -71,5 +74,6 @@ jobs:
       - uses: anatawa12/minecraft-server-start-test@v1
         with:
           version: ${{ steps.configure_version.outputs.mc_version }}
+          sleep_time: ${{ matrix.sleep_time }}
           minecraft_server_auto_closer_path:
             ./libs/${{ steps.configure_version.outputs.jar_name }}
