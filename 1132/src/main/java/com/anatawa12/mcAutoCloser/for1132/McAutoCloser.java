@@ -10,6 +10,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
@@ -36,6 +38,11 @@ public class McAutoCloser extends Common {
 
 
     final class Listeners {
+        @SuppressWarnings("unchecked")
+        private final Class<Event> classTickEvent$ServerTickEvent = (Class<Event>) findClass(
+                "net.minecraftforge.fml.common.gameevent.TickEvent$ServerTickEvent",
+                "net.minecraftforge.event.TickEvent$ServerTickEvent");
+
         public void dedicatedServerSetup(FMLDedicatedServerSetupEvent event) {
             isServer = true;
         }
@@ -52,8 +59,8 @@ public class McAutoCloser extends Common {
             server = null;
         }
 
-        public void tick(TickEvent.ServerTickEvent event) {
-            if (event.phase != TickEvent.Phase.START) return;
+        public void tick(Event event) {
+            if (!getField(classTickEvent$ServerTickEvent, event, "phase").toString().equals("START")) return;
             onTick();
         }
     }
@@ -65,7 +72,8 @@ public class McAutoCloser extends Common {
 
     @Override
     protected void startReceiveTicks() {
-        MinecraftForge.EVENT_BUS.addListener(listeners::tick);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false,
+                listeners.classTickEvent$ServerTickEvent, listeners::tick);
     }
 
     @Override
