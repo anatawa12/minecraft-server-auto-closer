@@ -101,7 +101,6 @@ public abstract class Common {
                 if (!"before".equals(sc.next()))
                     return false;
                 String token = sc.next();
-                infoLog("not int:"  + file + ", next:" + token);
                 if ("world".equals(token)) {
                     beforeWorldGen = true;
                     return true;
