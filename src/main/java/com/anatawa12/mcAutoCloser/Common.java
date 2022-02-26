@@ -14,7 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class Common {
+    private static Common instance;
     private static final File modFile = getClassSourceOf(Common.class);
+    private static boolean beforeWorldGen = false;
     private static int waitTicks = 0;
     private static int waitSeconds = 0;
 
@@ -23,10 +25,27 @@ public abstract class Common {
     protected abstract void stopReceiveTicks();
     protected abstract void infoLog(String msg, Object... args);
 
-    public void onServerStarted() {
+    public Common() {
+        instance = this;
+    }
+
+    /** @return true if abort */
+    public static boolean onAboutToStart() {
         waitTicks = 0;
         waitSeconds = 0;
-        findWait();
+        instance.findWait();
+        if (beforeWorldGen) {
+            instance.infoLog("requested to stop before world generation!");
+            return true;
+        }
+        instance.infoLog("before world generation hook");
+        return false;
+    }
+
+    public void onServerStarted() {
+        if (beforeWorldGen) {
+            throw new IllegalStateException("requested to stop before world generation but world was generated!");
+        }
         if (waitTicks == 0 && waitSeconds == 0) {
             infoLog("no delay found so shutdown the server now!");
             sendStop();
@@ -77,6 +96,18 @@ public abstract class Common {
         Scanner sc = null;
         try {
             sc = new Scanner(file);
+            // before start
+            if (!sc.hasNextInt()) {
+                if (!"before".equals(sc.next()))
+                    return false;
+                String token = sc.next();
+                infoLog("not int:"  + file + ", next:" + token);
+                if ("world".equals(token)) {
+                    beforeWorldGen = true;
+                    return true;
+                }
+                return false;
+            }
             int count = sc.nextInt();
             if (count < 0) return false;
             String token = sc.next();
